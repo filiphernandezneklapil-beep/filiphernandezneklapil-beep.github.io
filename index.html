@@ -1,1 +1,327 @@
-Wazzup Beijing
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The</title>
+
+<!-- Chunky cartoon font. If it can't load, the fallback fonts below are used. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --yellow: #ffd23f;
+    --outline: #7a3b00;
+    --letter-delay: 1.2s;   /* time before the first letter drops */
+    --letter-gap: .22s;     /* delay between letters */
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%;
+    background: #000;          /* black "before the card" screen */
+    overflow: hidden;
+  }
+
+  /* ---------- STAGE (iris-in reveal) ---------- */
+  .stage {
+    position: absolute; inset: 0;
+    background: linear-gradient(#48d0f7 0%, #1288d6 45%, #08407d 80%, #041f46 100%);
+    clip-path: circle(0% at 50% 50%);
+  }
+  .stage.play { animation: iris 1.1s cubic-bezier(.65, 0, .25, 1) .3s forwards; }
+  @keyframes iris {
+    to { clip-path: circle(75% at 50% 50%); }
+  }
+
+  /* everything inside shakes together when the word lands */
+  .scene { position: absolute; inset: 0; }
+  .stage.play .scene { animation: shake .55s linear var(--impact) both; }
+  @keyframes shake {
+    0%, 100% { transform: translate(0, 0); }
+    15% { transform: translate(-1.6vmin, .8vmin) rotate(-.4deg); }
+    30% { transform: translate(1.4vmin, -1vmin) rotate(.4deg); }
+    45% { transform: translate(-1vmin, -.6vmin); }
+    60% { transform: translate(.8vmin, .6vmin); }
+    80% { transform: translate(-.3vmin, .2vmin); }
+  }
+
+  /* ---------- LIGHT RAYS ---------- */
+  .rays {
+    position: absolute; left: -50%; top: -60%;
+    width: 200%; height: 200%;
+    background: conic-gradient(from 180deg at 50% 30%,
+      transparent 0 6%,  rgba(255,255,255,.22) 8%,  transparent 11%,
+      transparent 17%,   rgba(255,255,255,.16) 19%, transparent 23%,
+      transparent 31%,   rgba(255,255,255,.2)  33%, transparent 36%,
+      transparent 44%,   rgba(255,255,255,.14) 46%, transparent 50%,
+      transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 30%, #000 0%, transparent 60%);
+            mask-image: radial-gradient(ellipse at 50% 30%, #000 0%, transparent 60%);
+    transform-origin: 50% 30%;
+    animation: sway 9s ease-in-out infinite alternate;
+  }
+  @keyframes sway {
+    from { transform: rotate(-5deg); }
+    to   { transform: rotate(5deg); }
+  }
+
+  /* ---------- BUBBLES (made by JS) ---------- */
+  .bubble {
+    position: absolute; bottom: -12vh;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%,
+      rgba(255,255,255,.95), rgba(255,255,255,.18) 40%, rgba(255,255,255,.05) 70%);
+    border: 1px solid rgba(255,255,255,.55);
+    animation: rise var(--d) linear var(--delay) infinite;
+  }
+  @keyframes rise {
+    0%   { transform: translate(0, 0); opacity: 0; }
+    10%  { opacity: 1; }
+    50%  { transform: translate(calc(var(--x) * -.6), -60vh); }
+    100% { transform: translate(var(--x), -125vh); opacity: .9; }
+  }
+
+  /* ---------- WAVES ---------- */
+  .wave {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    height: 18vh; background-repeat: repeat-x;
+    background-size: 600px 100%;
+  }
+  .wave.back {
+    opacity: .55; bottom: 3vh;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 120' preserveAspectRatio='none'%3E%3Cpath d='M0 60 Q150 10 300 60 T600 60 L600 120 L0 120Z' fill='%2312a0e0'/%3E%3C/svg%3E");
+    animation: drift 14s linear infinite reverse;
+  }
+  .wave.front {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 120' preserveAspectRatio='none'%3E%3Cpath d='M0 60 Q150 10 300 60 T600 60 L600 120 L0 120Z' fill='%230a5ea8'/%3E%3C/svg%3E");
+    animation: drift 9s linear infinite;
+  }
+  @keyframes drift { to { background-position-x: 600px; } }
+
+  /* ---------- SHOCKWAVE RING ---------- */
+  .shock {
+    position: absolute; left: 50%; top: 50%;
+    width: 12vmin; height: 12vmin;
+    margin: -6vmin 0 0 -6vmin;
+    border-radius: 50%;
+    border: 1.2vmin solid rgba(255,255,255,.85);
+    opacity: 0;
+  }
+  .stage.play .shock { animation: shock .9s ease-out var(--impact) both; }
+  @keyframes shock {
+    from { transform: scale(.2); opacity: .9; }
+    to   { transform: scale(14); opacity: 0; }
+  }
+
+  /* ---------- THE TITLE ---------- */
+  .title {
+    position: absolute; inset: 0;
+    display: flex; flex-wrap: wrap;
+    align-items: center; justify-content: center;
+    gap: 0 .35em;
+    padding: 4vmin;
+    font-family: "Luckiest Guy", Impact, "Arial Black", sans-serif;
+    font-size: var(--size, 28vw);
+    line-height: 1;
+    text-align: center;
+    user-select: none;
+  }
+  .stage.play .title { animation: pop .7s ease-out var(--impact) both; }
+  @keyframes pop {
+    0%   { transform: scale(1); }
+    30%  { transform: scale(1.14, .9); }
+    60%  { transform: scale(.96, 1.06); }
+    100% { transform: scale(1); }
+  }
+
+  .word { display: inline-flex; white-space: nowrap; }
+
+  /* outer span = drop-in animation */
+  .letter {
+    display: inline-block;
+    opacity: 0;                       /* hidden until it drops */
+    transform-origin: 50% 100%;
+  }
+  .stage.play .letter {
+    animation: drop 1.1s cubic-bezier(.3, .6, .4, 1)
+               calc(var(--letter-delay) + var(--i) * var(--letter-gap)) both;
+  }
+  @keyframes drop {
+    0%   { opacity: 1; transform: translateY(-130vh) rotate(-40deg) scale(.6); }
+    55%  { opacity: 1; transform: translateY(0) rotate(6deg) scale(1.25, .7); }
+    70%  { opacity: 1; transform: translateY(-14%) rotate(-3deg) scale(.95, 1.06); }
+    85%  { opacity: 1; transform: translateY(0) rotate(1deg) scale(1.1, .88); }
+    100% { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
+  }
+
+  /* inner span = look + endless wobble */
+  .glyph {
+    position: relative; display: inline-block;
+    color: var(--yellow);
+    -webkit-text-stroke: .07em var(--outline);
+    paint-order: stroke fill;
+    filter:
+      drop-shadow(0 .03em 0 #c2700a)
+      drop-shadow(0 .06em 0 #8f4a05)
+      drop-shadow(0 .12em .06em rgba(0, 0, 0, .45));
+    transform-origin: 50% 100%;
+  }
+  .stage.play .glyph {
+    animation: bob 2.8s ease-in-out infinite;
+    animation-delay: calc(var(--impact) + var(--i) * .25s);
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0) rotate(-1.5deg) scale(1); }
+    50%      { transform: translateY(-3%) rotate(1.5deg) scale(1.03, .98); }
+  }
+
+  /* shiny sweep that runs across each letter, one after another */
+  .glyph::after {
+    content: attr(data-char);
+    position: absolute; inset: 0;
+    color: transparent;
+    -webkit-text-stroke: 0;
+    background: linear-gradient(105deg,
+      transparent 40%, rgba(255,255,255,.95) 50%, transparent 60%);
+    background-size: 260% 100%;
+    background-position: 160% 0;
+    -webkit-background-clip: text;
+            background-clip: text;
+  }
+  .stage.play .glyph::after {
+    animation: shine 3.6s ease-in-out infinite;
+    animation-delay: calc(var(--impact) + .6s + var(--i) * .14s);
+  }
+  @keyframes shine {
+    0%        { background-position: 160% 0; }
+    35%, 100% { background-position: -60% 0; }
+  }
+
+  /* ---------- REPLAY BUTTON ---------- */
+  .replay {
+    position: fixed; right: 16px; bottom: 16px; z-index: 10;
+    padding: .6em 1.1em;
+    font: 600 15px/1 system-ui, sans-serif;
+    color: #fff; background: rgba(0, 0, 0, .45);
+    border: 1px solid rgba(255, 255, 255, .4);
+    border-radius: 999px; cursor: pointer;
+    backdrop-filter: blur(6px);
+  }
+  .replay:hover { background: rgba(0, 0, 0, .65); }
+
+  /* ---------- ACCESSIBILITY: reduced motion ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    .stage, .stage * , .stage *::after {
+      animation-duration: .01ms !important;
+      animation-delay: 0s !important;
+      animation-iteration-count: 1 !important;
+    }
+    .bubble, .rays { display: none; }
+  }
+</style>
+</head>
+
+<body>
+  <div class="stage" id="stage">
+    <div class="scene">
+      <div class="rays"></div>
+      <div id="bubbles"></div>
+      <div class="wave back"></div>
+      <div class="wave front"></div>
+      <div class="shock"></div>
+      <h1 class="title" id="title" aria-label="The"></h1>
+    </div>
+  </div>
+
+  <button class="replay" id="replay" type="button">↻ Replay</button>
+
+<script>
+  /* ============================================================
+     CHANGE THIS LINE for future lessons, e.g. "The Lord of the Rings"
+     ============================================================ */
+  const TITLE_TEXT = "The";
+
+  const stage   = document.getElementById("stage");
+  const title   = document.getElementById("title");
+  const bubbles = document.getElementById("bubbles");
+
+  /* Build the title: one span per letter so each can animate on its own */
+  function buildTitle(text) {
+    title.innerHTML = "";
+    title.setAttribute("aria-label", text);
+    let index = 0;
+
+    text.split(" ").forEach(function (wordText) {
+      const word = document.createElement("span");
+      word.className = "word";
+      word.setAttribute("aria-hidden", "true");
+
+      wordText.split("").forEach(function (ch) {
+        const letter = document.createElement("span");
+        letter.className = "letter";
+        letter.style.setProperty("--i", index++);
+
+        const glyph = document.createElement("span");
+        glyph.className = "glyph";
+        glyph.dataset.char = ch;
+        glyph.textContent = ch;
+
+        letter.appendChild(glyph);
+        word.appendChild(letter);
+      });
+      title.appendChild(word);
+    });
+
+    // time when the LAST letter hits the ground -> triggers shake, ring, pop
+    const impact = 1.2 + (index - 1) * 0.22 + 0.6;
+    stage.style.setProperty("--impact", impact + "s");
+    fitTitle(text);
+  }
+
+  /* Make long titles smaller so they fit on screen */
+  function fitTitle(text) {
+    const w = window.innerWidth, h = window.innerHeight;
+    const longestWord = Math.max.apply(null, text.split(" ").map(function (s) { return s.length; }));
+    const byWidth  = (w * 0.9) / (longestWord * 0.65);
+    const byHeight = h * (text.includes(" ") ? 0.28 : 0.55);
+    title.style.setProperty("--size", Math.min(w * 0.28, byWidth, byHeight) + "px");
+  }
+
+  /* Random rising bubbles */
+  function makeBubbles(count) {
+    bubbles.innerHTML = "";
+    for (let i = 0; i < count; i++) {
+      const b = document.createElement("div");
+      const size = 8 + Math.random() * 38;
+      b.className = "bubble";
+      b.style.width = b.style.height = size + "px";
+      b.style.left = Math.random() * 100 + "%";
+      b.style.setProperty("--d", 6 + Math.random() * 9 + "s");
+      b.style.setProperty("--delay", -Math.random() * 12 + "s");
+      b.style.setProperty("--x", (Math.random() * 120 - 60) + "px");
+      bubbles.appendChild(b);
+    }
+  }
+
+  /* Start / restart the whole animation */
+  function play() {
+    stage.classList.remove("play");
+    buildTitle(TITLE_TEXT);
+    void stage.offsetWidth;          // force the browser to reset animations
+    stage.classList.add("play");
+  }
+
+  makeBubbles(34);
+  play();
+
+  document.getElementById("replay").addEventListener("click", play);
+  document.addEventListener("keydown", function (e) {
+    if (e.code === "Space" || e.code === "Enter") { e.preventDefault(); play(); }
+  });
+  window.addEventListener("resize", function () { fitTitle(TITLE_TEXT); });
+</script>
+</body>
+</html>
